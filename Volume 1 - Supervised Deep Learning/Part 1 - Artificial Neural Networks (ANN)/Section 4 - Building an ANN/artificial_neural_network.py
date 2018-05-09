@@ -37,12 +37,19 @@ X_test = sc.transform(X_test)
 # ------ CREATING THE ANN ------
 import keras
 from keras.models import Sequential
-from keras.layers import Dense
+from keras.layers import Dense, Dropout
 
 
 classifier = Sequential()
+# Input layer and first hidden layer
 classifier.add(Dense(output_dim = 6, init = 'uniform', activation = 'relu', input_dim = 11))
+# Adding dropout of 10% in case of over-fitting
+classifier.add(Dropout(p = 0.1))
+
+# Adding second hidden layer
 classifier.add(Dense(output_dim = 6, init = 'uniform', activation = 'relu'))
+classifier.add(Dropout(p = 0.1))
+
 classifier.add(Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid'))
 
 
@@ -65,6 +72,27 @@ new_test = classifier.predict(sc.transform(np.array([[0.0, 0, 600, 1, 40, 3, 600
 new_pred = (new_test > 0.5)
 
 
+# ------ KFOLD CROSS VALIDATION TO BETTER EVALUATE ANN PERFORMANCE ---------
+from keras.wrappers.scikit_learn import KerasClassifier
+from sklearn.model_selection import cross_val_score
+from keras.models import Sequential
+from keras.layers import Dense
+
+def build_classifier():
+    classifier = Sequential()
+    classifier.add(Dense(output_dim = 6, init = 'uniform', activation = 'relu', input_dim = 11))
+    classifier.add(Dense(output_dim = 6, init = 'uniform', activation = 'relu'))
+    classifier.add(Dense(output_dim = 1, init = 'uniform', activation = 'sigmoid'))
+    classifier.compile(optimizer = 'adam', loss = 'binary_crossentropy', metrics = ['accuracy'])
+    return classifier
+
+classifier = KerasClassifier(build_fn = build_classifier, batch_size = 10, nb_epoch = 100)
+accuracies = cross_val_score(estimator = classifier, X = X_train, y = y_train, cv = 10, n_job = -1)
+mean = accuracies.mean()
+variance = accuracies.std()
+
+
+    
 # Making the Confusion Matrix
 from sklearn.metrics import confusion_matrix
 cm = confusion_matrix(y_test, y_pred)
