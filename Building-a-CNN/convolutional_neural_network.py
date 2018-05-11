@@ -17,7 +17,7 @@ classifier.add(MaxPooling2D(pool_size = (2, 2)))
 classifier.add(Convolution2D(32, 3, 3, activation = "relu"))
 classifier.add(MaxPooling2D(pool_size = (2, 2)))
 
-
+# Can add more convolution layers with max pooling to increase accuracy
 
 # ------- FLATTENING -------
 classifier.add(Flatten())
@@ -25,6 +25,7 @@ classifier.add(Flatten())
 
 # ------- FULL CONNECTION TO ANN -------
 classifier.add(Dense(output_dim = 128, activation = "relu"))
+# Can add 1 instance of dropout here to increase accuracy by letting neurons learn about other features better
 # Using sigmoid function for the output since we have a binary outcome (either cat or dog)
 # If not binary, use softmax activation function
 classifier.add(Dense(output_dim = 1, activation = "sigmoid"))
